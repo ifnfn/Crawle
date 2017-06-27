@@ -73,7 +73,7 @@ class ParserBookDetailed(KolaParser):
         # print(bookdata)
         # print(order)
         # print(intro)
-        return True, data
+        return data
 
 
 class ParserBookList(KolaParser):
@@ -103,7 +103,7 @@ class ParserBookList(KolaParser):
             book['name'] = p.text
             print(book)
 
-            ParserBookDetailed(p['href'], book).Execute()
+            ParserBookDetailed(p['href'], book).AddCommand()
             data.append(book)
 
         # 下一页
@@ -112,19 +112,15 @@ class ParserBookList(KolaParser):
         #     'a', {'class': 'next', "hidefocus": "hidefocus"})
         # for a in next_text:
         #     href = a.attrs['href']
-        #     ParserBookList(href).Execute()
+        #     ParserBookList(href).AddCommand()
 
-        return True, None
+        return None
 
 # JD 搜索引擎
 
 
 class Zi5Engine(EngineBase):
     def __init__(self):
-        super().__init__()
-
-        self.engine_name = 'KindlePush'
-
         self.parserList = [
             ParserBookDetailed(),
             ParserBookList(),
@@ -132,4 +128,4 @@ class Zi5Engine(EngineBase):
 
     def Start(self):
         url = 'http://book.zi5.me/archives/book-gentre/xdwx'
-        ParserBookList(url).Execute()
+        ParserBookList(url).AddCommand()

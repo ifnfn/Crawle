@@ -4,6 +4,7 @@
 import hashlib
 import redis
 
+
 class CachedBase:
     def __init__(self):
         self.expireTime = 60 * 60
@@ -20,12 +21,14 @@ class CachedBase:
     def GetKey(self, key):
         return key
         #key = hashlib.sha1(key.encode()).hexdigest()
-        #return 'album_' + key
+        # return 'album_' + key
+
 
 class RedisCached(CachedBase):
     def __init__(self):
         super().__init__()
         self.url_cachedb = redis.Redis(host='127.0.0.1', port=6379, db=2)
+        self.url_cachedb.flushdb()
 
     def Clean(self, regular='*'):
         pipe = self.url_cachedb.pipeline()

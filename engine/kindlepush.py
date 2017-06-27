@@ -102,7 +102,7 @@ class ParserBookList(KolaParser):
             book['name'] = p.text
             print(book)
 
-            ParserBookDetailed(p['href'], book).Execute()
+            ParserBookDetailed(p['href'], book).AddCommand()
             data.append(book)
 
         # 下一页
@@ -111,7 +111,7 @@ class ParserBookList(KolaParser):
         #     'a', {'class': 'next', "hidefocus": "hidefocus"})
         # for a in next_text:
         #     href = a.attrs['href']
-        #     ParserBookList(href).Execute()
+        #     ParserBookList(href).AddCommand()
 
         return True, None
 
@@ -120,10 +120,6 @@ class ParserBookList(KolaParser):
 
 class JDEngine(EngineBase):
     def __init__(self):
-        super().__init__()
-
-        self.engine_name = 'KindlePush'
-
         self.parserList = [
             ParserBookDetailed(),
             ParserBookList(),
@@ -131,4 +127,4 @@ class JDEngine(EngineBase):
 
     def Start(self):
         url = 'http://www.kindlepush.com/category/-1/0/1'
-        ParserBookList(url).Execute()
+        ParserBookList(url).AddCommand()

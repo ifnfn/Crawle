@@ -11,6 +11,30 @@ from .engines import EngineBase, KolaParser
 from .fetchTools import RegularMatchUrl
 
 
+class ParserDoubanISBN(KolaParser):
+    def __init__(self, url=None, data=None):
+        super().__init__()
+        if url:
+            self.cmd['source'] = url
+            self.cmd['cache'] = True
+            self.cmd['private'] = data
+
+    def cmd_parser(self, text):
+        data = {}
+        if 'private' in text:
+            data = text['private']
+        # return data
+        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+
+        # print(soup)
+        for info in soup.findAll("div", {"class": "info"}):
+            href = info.findAll("a", {"onclick": re.compile('.*')})
+            if href:
+                data['douban'] = href[0]['href']
+
+        return data
+
+
 class ParserBookDetailed(KolaParser):
     """
     解析图书的详细信息
@@ -46,7 +70,7 @@ class ParserBookDetailed(KolaParser):
                     <li><strong>浏览：</strong>4370次</li>
                     <li><strong>标签：</strong><a href="https://sokindle.com/books/tag/lishi" rel="tag">历史</a> <a href="https://sokindle.com/books/tag/%e6%84%8f%e5%a4%a7%e5%88%a9" rel="tag">意大利</a> <a href="https://sokindle.com/books/tag/%e8%80%83%e5%8f%a4" rel="tag">考古</a></li>
                     <li><strong>时间：</strong>2017-06-19</li>
-                    <li><strong>评分：</strong><b class="dbpf dbpf8"></b></li> <li><strong>ISBN：</strong>9787516185735</li> 
+                    <li><strong>评分：</strong><b class="dbpf dbpf8"></b></li> <li><strong>ISBN：</strong>9787516185735</li>
                     <ul></ul>
                 </ul>
             </div>
@@ -57,8 +81,6 @@ class ParserBookDetailed(KolaParser):
         if 'private' in text:
             data = text['private']
         soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
-
-        print("parser-> ", data["href"])
 
         secret_data = soup.findAll('div', {"class": "e-secret"})
 
@@ -111,11 +133,20 @@ class ParserBookDetailed(KolaParser):
                 if douban:
                     data["douban"] = douban[0]
 
-                isdn = re.findall("ISBN：(.*)", text)
-                if isdn:
-                    data["isdn"] = isdn[0]
+                isbn = re.findall("ISBN：(.*)", text)
+                if isbn:
+                    if 'ISBN: ' in isbn[0]:
+                        isbn = re.findall("ISBN: (.*)", isbn[0])
+                    if isbn:
+                        data["isbn"] = isbn[0]
 
-        return True, data
+        if 'isbn' in data and data['isbn']:
+            # print(data['isbn'])
+            url = 'https://book.douban.com/subject_search?search_text=%s&cat=1001' % data['isbn']
+            ParserDoubanISBN(url, data).AddCommand()
+            pass
+
+        return data
 
 
 class ParserBookList(KolaParser):
@@ -147,7 +178,7 @@ class ParserBookList(KolaParser):
                 book['name'] = x[0]['title']
 
                 # print(book)
-                ParserBookDetailed(book['href'], book).Execute()
+                ParserBookDetailed(book['href'], book).AddCommand()
 
         # 下一页
         # <li class="next-page"><a href="https://sokindle.com/page/2">下一页</a></li>
@@ -155,28 +186,30 @@ class ParserBookList(KolaParser):
         for aaa in next_text:
             # print(aaa.prettify())
             for url in aaa.findAll('a'):
-                print(url['href'])
-                ParserBookList(url['href']).Execute()
+                # print(url['href'])
+                ParserBookList(url['href']).AddCommand()
 
-        return True, None
+        return None
 
 # JD 搜索引擎
 
 
 class SokindleEngine(EngineBase):
     def __init__(self):
-        super().__init__()
-
-        self.engine_name = 'KindlePush'
-
         self.parserList = [
-            ParserBookDetailed(),
             ParserBookList(),
+            ParserBookDetailed(),
+            ParserDoubanISBN(),
         ]
 
     def Start(self):
         # url = "https://sokindle.com/books/4600.html"
-        # ParserBookDetailed(url).Execute()
+        # ParserBookDetailed(url).AddCommand()
 
         url = 'https://sokindle.com'
-        ParserBookList(url).Execute()
+        ParserBookList(url).AddCommand()
+
+        # data = {}
+        # data['isbn'] = '9787221124913'
+        # ParserDoubanISBN('9787221124913', data).AddCommand()
+        pass

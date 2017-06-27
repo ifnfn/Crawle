@@ -7,7 +7,7 @@ import re
 import traceback
 
 from .fetchTools import fetch, RegularMatch
-from .engines import EngineCommands
+from .engines import EngineCommands, commands
 from .kindlepush import JDEngine
 from .zi5 import Zi5Engine
 from .sokindle import SokindleEngine
@@ -17,8 +17,8 @@ MAX_TRY = 3
 
 class KolaEngine:
     def __init__(self):
-        self.command = EngineCommands()
         self.engines = []
+        self.parserList = []
         self.UpdateAlbumFlag = False
 
         # self.AddEngine(JDEngine)
@@ -26,17 +26,23 @@ class KolaEngine:
         self.AddEngine(SokindleEngine)
 
     def GetCommand(self):
-        return self.command.GetCommand()
+        return commands.GetCommand()
 
     def AddEngine(self, egClass):
-        self.engines.append(egClass())
+        eg = egClass()
+        self.engines.append(eg)
+        self.parserList.extend(eg.parserList)
 
-    def ParserJson(self, js):
-        if js != None and 'data' in js:
-            for eg in self.engines:
-                status, data = eg.ParserHtml(js)
-                if status:
-                    return data
+    # 解析菜单网页解析
+    def ParserHtml(self, js):
+        try:
+            for engine in self.parserList:
+                if engine.name == js['engine']:
+                    return engine.cmd_parser(js)
+        except:
+            t, v, tb = sys.exc_info()
+            print("VideoEngine.ParserHtml:  %s,%s, %s" %
+                  (t, v, traceback.format_tb(tb)))
 
         return None
 
@@ -81,6 +87,9 @@ class KolaEngine:
                 else:
                     return None
 
+            if found == False:
+                return None
+
             # 对数据 response 转码
             coding = 'utf8'
             try:
@@ -102,8 +111,7 @@ class KolaEngine:
             else:
                 print("[WARNING] Data is empty", cmd['source'])
 
-            return self.ParserJson(cmd)
-
+            return self.ParserHtml(cmd)
         except:
             t, v, tb = sys.exc_info()
             print("ProcessCommand playurl: %s, %s, %s" %

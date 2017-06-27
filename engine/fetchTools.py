@@ -97,7 +97,7 @@ def get_url(url, times=0):
         return response, True
     except:
         t, v, tb = sys.exc_info()
-        print("KolaClient.GetUrl: %s %s, %s, %s" %
+        print("get_url: %s %s, %s, %s" %
               (url, t, v, traceback.format_tb(tb)))
         return get_url(url, times + 1)
 
