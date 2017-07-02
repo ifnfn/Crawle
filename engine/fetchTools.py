@@ -92,7 +92,7 @@ def get_url(url, times=0):
     try:
         status, _, _, response = fetch_httplib2(url)
         if status != '200' and status != '304' and status != '404':
-            print('status %s, try %d ...' % (status, times + 1))
+            print('status %s, try %d, %s ...' % (status, times + 1, url))
             return get_url(url, times + 1)
         return response, True
     except:

@@ -6,6 +6,10 @@
 import threading
 import engine
 import pymongo
+import tornado.escape
+import json
+import re
+import os
 
 
 class Crawler:
@@ -18,6 +22,7 @@ class Crawler:
         self.tv.Start()
         self.db = pymongo.MongoClient().sumfeel
         self.books = self.db.books
+        self.b = []
 
     def Wait(self):
         for item in self.threads:
@@ -26,14 +31,24 @@ class Crawler:
             if item.isAlive():
                 item.join()
 
+        file = open('data.json', 'w')
+        text = tornado.escape.json_encode(self.b)
+        file.write(text)
+        file.close()
+
+        for v in self.b:
+            print(v['name'])
+
     def RunOne(self):
         cmd = self.tv.GetCommand()
         if cmd:
             data = self.tv.ProcessCommand(cmd, 3)
             if data:
                 # print(data)
-                self.books.insert_one(data)
-                return True
+                # self.books.insert_one(data)
+                # del data['_id']
+                self.b.append(data)
+            return True
         return False
 
 
@@ -43,12 +58,13 @@ class Work(threading.Thread):
         self.crawler = crawler
 
     def run(self):
-        while True:
-            self.crawler.RunOne()
+        while self.crawler.RunOne():
+            pass
 
 
 def main():
-    Crawler(4).Wait()
+    craw = Crawler(4)
+    craw.Wait()
 
 
 if __name__ == '__main__':
