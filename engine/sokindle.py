@@ -11,22 +11,6 @@ from .engines import EngineBase, KolaParser
 from .fetchTools import RegularMatchUrl
 
 
-class ParserDoubanDetailed(KolaParser):
-    def __init__(self, url=None, data=None):
-        super().__init__()
-        if url:
-            self.cmd['source'] = url
-            self.cmd['cache'] = True
-            self.cmd['private'] = data
-
-    def cmd_parser(self, text):
-        data = {}
-        if 'private' in text:
-            data = text['private']
-        # return data
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
-
-
 class ParserDoubanISBN(KolaParser):
     def __init__(self, url=None, data=None):
         super().__init__()
@@ -39,15 +23,13 @@ class ParserDoubanISBN(KolaParser):
         data = {}
         if 'private' in text:
             data = text['private']
-        # return data
+
         soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
 
-        # print(soup)
         for info in soup.findAll("div", {"class": "info"}):
             href = info.findAll("a", {"onclick": re.compile('.*')})
             if href:
                 data['douban'] = href[0]['href']
-                # ParserDoubanDetailed(data['douban'], data).AddCommand()
 
         return data
 

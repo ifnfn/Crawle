@@ -65,6 +65,7 @@ def fetch_httplib2(url, method='GET', data=None, header=headers, cookies=None, r
 def get_cache(url):
     filename = './cache/' + hashlib.md5(url.encode('utf8')).hexdigest().upper()
     exists = os.path.exists(filename)
+
     response = None
 
     if exists:

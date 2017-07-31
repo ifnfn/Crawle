@@ -58,9 +58,9 @@ class Crawler:
 
         if book != None:
             self.getId(book)
-            # self.Download(book)
-            self.putFile(book)
-            # self.checkFile(book)
+            if not self.checkFile(book):
+                print(book['name'])
+                self.Download(book)
 
             return True
 
@@ -73,7 +73,6 @@ class Crawler:
             book['id'] = i
 
     def Download(self, book):
-        print(book)
         if 'download' in book and 'password' in book and book['id'] != "":
             secret = "--secret=%s" % book['password']
             dirs = "--dir=books/%s" % book['id']
@@ -85,50 +84,20 @@ class Crawler:
 
         return False
 
-    def UploadQiniu(self, key, localFile):
-        access_key = "LigcPM8yh3cnEtqIqiG8isRbUDDUA90pJa91lNSq"
-        secret_key = "T0nIp2L9dWtSQd0FzruiFfVaZXMWggODeuJfQ9Tc"
-        bucket_name = "books"
-
-        token = qiniu.Auth(access_key, secret_key).upload_token(bucket_name)
-
-        ret, info = qiniu.put_file(token, key, localFile)
-        if ret is not None:
-            print(key + ' -> Qiniu OK')
-            return True
-        else:
-            print(info)
-
-        return False
-
-    def putFile(self, book):
-        found = False
-        if book['id'] != "":
-            try:
-                listfile = os.listdir("books/" + book['id'])
-                for line in listfile:
-                    key = book['id'] + ": " + line
-                    localFile = "books/%s/%s" % (book['id'], line)
-                    self.UploadQiniu(key, localFile)
-                    found = True
-            except:
-                pass
-        if found == False:
-            print("No found: " + book["href"])
-
     def checkFile(self, book):
         found = False
-        if book['id'] != "":
-            try:
-                listfile = os.listdir("books/" + book['id'])
-                for line in listfile:
-                    key = book['id'] + ": " + line
-                    localFile = "books/%s/%s" % (book['id'], line)
-                    found = True
-            except:
-                pass
+        try:
+            listfile = os.listdir("books/" + book['id'])
+            for line in listfile:
+                key = book['id'] + ": " + line
+                localFile = "books/%s/%s" % (book['id'], line)
+                found = True
+        except:
+            pass
+
         if found == False:
             print("No found: " + book["href"])
+        return found
 
 
 class Work(threading.Thread):
@@ -142,7 +111,7 @@ class Work(threading.Thread):
 
 
 def main():
-    craw = Crawler(20).Wait()
+    craw = Crawler(10).Wait()
 
 
 if __name__ == '__main__':
