@@ -4,10 +4,14 @@
 import base64
 import hashlib
 import os
+import shutil
 import sys
 import traceback
 import zlib
 import re
+import pickle
+import gzip
+from Crypto.Cipher import AES
 
 import httplib2
 
@@ -16,6 +20,22 @@ global headers
 
 MAX_TRY = 3
 socket_timeout = 30
+
+
+class AEScoder():
+    def __init__(self):
+        self.__encryptKey = "iEpSxImA0vpMUAabsjJWug=="
+        self.__key = base64.b64decode(self.__encryptKey)
+
+    def encrypt(self, data):
+        encrData = base64.b64encode(data)
+        return encrData
+
+    def decrypt(self, encrData):
+        encrData = base64.b64decode(encrData)
+
+        return encrData
+
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36',
@@ -41,7 +61,7 @@ def fetch_httplib2(url, method='GET', data=None, header=headers, cookies=None, r
 
     if method == 'POST':
         header['Content-Type'] = 'application/x-www-form-urlencoded'
-    conn = httplib2.Http('.cache', timeout=socket_timeout)
+    conn = httplib2.Http(timeout=socket_timeout)
     conn.follow_redirects = True
     response, responses = conn.request(uri=url, method=str(
         method).upper(), body=data,  headers=header)
@@ -63,27 +83,39 @@ def fetch_httplib2(url, method='GET', data=None, header=headers, cookies=None, r
 
 
 def get_cache(url):
+    response = None
+
     filename = './cache/' + hashlib.md5(url.encode('utf8')).hexdigest().upper()
     exists = os.path.exists(filename)
 
-    response = None
-
+    if not exists:
+        filename2 = './cache-old/' + \
+            hashlib.md5(url.encode('utf8')).hexdigest().upper()
+        exists = os.path.exists(filename2)
+        if exists:
+            shutil.move(filename2, filename)
+            exists = os.path.exists(filename)
     if exists:
         f = open(filename, 'rb')
         response = f.read()
+        response = AEScoder().decrypt(response)
         f.close()
-        print(filename, url)
+        # print(filename, url)
 
     return response, exists
 
 
 def save_cache(url, response):
+    if not response:
+        return
+    response = AEScoder().encrypt(response)
     filename = './cache/' + hashlib.md5(url.encode('utf8')).hexdigest().upper()
     try:
         f = open(filename, 'wb')
         f.write(response)
         f.close()
-    except:
+    except Exception as e:
+        print(e)
         pass
 
 
@@ -194,3 +226,18 @@ if __name__ == '__main__':
     # except:
     #     content_type = ''
     print(response.decode())
+
+
+def data_save(filename, *objects):
+    with gzip.open(filename, 'wb') as fil:
+        for obj in objects:
+            pickle.dump(obj, fil)
+
+
+def data_load(filename):
+    with gzip.open(filename, 'rb') as fil:
+        while True:
+            try:
+                return pickle.load(fil)
+            except EOFError:
+                break

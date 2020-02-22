@@ -6,8 +6,6 @@
 
 import threading
 import engine
-import pymongo
-import tornado.escape
 import json
 import re
 import os
@@ -36,17 +34,6 @@ class Crawler:
         for item in self.threads:
             if item.isAlive():
                 item.join()
-
-        # for v in self.b:
-        #     print(v['name'])
-            # text = tornado.escape.json_encode(v)
-            # print(text)
-
-        # file = open('data.json', 'w')
-        # text = tornado.escape.json_encode(self.b)
-        # file.write(text)
-        # file.close()
-        # print(self.b)
 
     def RunOne(self):
         book = None

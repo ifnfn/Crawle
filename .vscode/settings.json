@@ -9,5 +9,6 @@
         "**/.cache": true,
         "**/__pycache__": true,
         "**/cache": true
-    }
+    },
+    "python.pythonPath": "/usr/bin/python"
 }

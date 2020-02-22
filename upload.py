@@ -6,8 +6,6 @@
 
 import threading
 import engine
-import pymongo
-import tornado.escape
 import json
 import re
 import os

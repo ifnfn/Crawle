@@ -1,14 +1,14 @@
 #! /usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from engine import *
+import sys
 import re
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup as bs, Tag
-import tornado.escape
+from bs4 import BeautifulSoup as bs
 
-from .engines import EngineBase, KolaParser
-from .fetchTools import RegularMatchUrl
+sys.path.append("../")
 
 
 class ParserBookDetailed(KolaParser):

@@ -3,51 +3,32 @@
 
 import sys
 import traceback
-import redis
-import threading
-import tornado.escape
-from .singleton import Singleton
-
-global Debug
-Debug = True
+import queue
 
 MAX_TRY = 3
 
 
-class EngineCommands(Singleton):
+class EngineCommands:
     """
     命令管理器
     """
 
-    mutex = threading.Lock()
-
     def __init__(self):
-        self.db = redis.Redis(host='127.0.0.1', port=6379, db=0)
-        self.db.flushall()
-        self.pipe = self.db.pipeline()
-        self.commandList = []
+        self.cmd_queue = queue.Queue()
+        self.quit = False
 
     def AddCommand(self, cmd):
         if 'source' in cmd or 'text' in cmd:
-            EngineCommands.mutex.acquire()
-            # self.commandList.append(cmd)
-
-            self.pipe.rpush('command', tornado.escape.json_encode(cmd))
-            self.pipe.execute()
-            EngineCommands.mutex.release()
+            self.cmd_queue.put(cmd)
 
     def GetCommand(self):
-        ret = {}
-        EngineCommands.mutex.acquire()
-        # cmd = self.commandList.pop()
-        cmd = self.db.lpop('command')
-        if cmd:
+        ret = None
+        while not ret:
             try:
-                ret = tornado.escape.json_decode(cmd)
+                ret = self.cmd_queue.get(True, 3)
             except:
-                print(cmd)
-
-        EngineCommands.mutex.release()
+                if self.quit:
+                    return None
 
         return ret
 
@@ -66,7 +47,12 @@ class KolaParser:
         self.cmd['engine'] = self.name
         self.cmd['cache'] = True
 
+    def Finish(self):
+        global commands
+        commands.quit = True
+
     def AddCommand(self):
+        global commands
         if self.cmd:
             try:
                 commands.AddCommand(self.cmd)

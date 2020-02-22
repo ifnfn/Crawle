@@ -5,12 +5,11 @@ import sys
 import json
 import re
 import traceback
+import threading
 
-from .fetchTools import fetch, RegularMatch
-from .engines import EngineCommands, commands
-from .kindlepush import JDEngine
-from .zi5 import Zi5Engine
-from .sokindle import SokindleEngine
+from .fetchTools import *
+from .engines import commands
+
 
 MAX_TRY = 3
 
@@ -20,10 +19,6 @@ class KolaEngine:
         self.engines = []
         self.parserList = []
         self.UpdateAlbumFlag = False
-
-        # self.AddEngine(JDEngine)
-        # self.AddEngine(Zi5Engine)
-        self.AddEngine(SokindleEngine)
 
     def GetCommand(self):
         return commands.GetCommand()
@@ -56,7 +51,6 @@ class KolaEngine:
     #   'cache'  : False
     # }
     def ProcessCommand(self, cmd, times=0):
-        ret = False
         cached = True
         found = False
         response = ''
@@ -119,3 +113,52 @@ class KolaEngine:
             return self.ProcessCommand(cmd, times + 1)
 
         return None
+
+
+class Crawler:
+    def __init__(self, thread_num=1):
+        self.threads = []
+        for _ in range(thread_num):
+            self.threads.append(Work(self))
+
+        self.data = []
+        self.tv = KolaEngine()
+
+    def AddEngine(self, e):
+        self.tv.AddEngine(e)
+
+    def Save(self, filename):
+        data_save(filename, self.data)
+
+    def Load(self, filename):
+        self.data = data_load(filename)
+        if self.data == None:
+            self.data = []
+
+    def Fly(self):
+        self.tv.Start()
+        for item in self.threads:
+            item.start()
+        for item in self.threads:
+            item.join()
+        print("Finish!")
+
+    def RunOne(self):
+        cmd = self.tv.GetCommand()
+        if cmd:
+            d = self.tv.ProcessCommand(cmd, 3)
+            if d:
+                self.data.append(d)
+            return True
+
+        return False
+
+
+class Work(threading.Thread):
+    def __init__(self, crawler):
+        super().__init__()
+        self.crawler = crawler
+
+    def run(self):
+        while self.crawler.RunOne():
+            pass
