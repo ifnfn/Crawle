@@ -146,6 +146,7 @@ class Crawler:
     def RunOne(self):
         cmd = self.tv.GetCommand()
         if cmd:
+            cmd['data'] = self.data
             d = self.tv.ProcessCommand(cmd, 3)
             if d:
                 self.data.append(d)

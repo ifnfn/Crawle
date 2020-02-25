@@ -207,7 +207,7 @@ class SokindleEngine(EngineBase):
         # url = "https://sokindle.com/books/4600.html"
         # ParserBookDetailed(url).AddCommand()
 
-        url = 'https://sokindle.com'
+        url = 'https://sobooks.cc/page/1'
         ParserBookList(url).AddCommand()
 
         # data = {}

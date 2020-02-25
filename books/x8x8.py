@@ -51,7 +51,7 @@ class X8List(KolaParser):
         # <a class="pagenum extend" href='page_2.html'>下一页</a>
         for page in soup.findAll('a', {'class': 'pagenum extend'}):
             # print(page.prettify())
-            if page.text == '下一页' and page['href'] != 'page_1200.html':
+            if page.text == '下一页' and page['href'] != 'page_20.html':
                 next_url = urljoin(text['source'], page['href'])
                 print(next_url)
                 X8List(next_url).AddCommand()
@@ -94,7 +94,7 @@ class X8Detailed(KolaParser):
 
         if 'url' in data and data['url']:
             count += 1
-            # print("%4d %10s %s %s" % (count, data['time'], data['url'], data['text']))
+            print("%4d %10s %s %s" % (count, data['time'], data['url'], data['text']))
 
             return data
 
@@ -107,7 +107,17 @@ class X8Engine(EngineBase):
         ]
 
     def Start(self):
+        url = 'https://8atw.com/html/category/video/'
+
+        text, ret = get_url('https://8x8x.com')
+        if ret:
+            soup = bs(text, "html.parser", exclude_encodings='UTF8')
+            for v in soup.findAll('span', {"class": "abc"}):
+                urls = v.findAll('a')
+                if urls:
+                    url = urljoin(urls[0]['href'], 'html/category/video/')
+
         # url = 'https://8atw.com/html/category/video/'
-        # url = 'https://8aam.com/html/category/video/'
-        url = 'https://8aam.com/html/category/video/page_1101.html'
+        # url = 'https://8aam.com/html/category/video/page_1.html'
+        # # url = 'https://8aam.com/html/category/video/page_1220.html'
         X8List(url).AddCommand()

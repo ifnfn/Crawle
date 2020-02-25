@@ -142,7 +142,7 @@ def post_url(url, header={}, data=None, cached=False, times=0):
         status, _, _, response = fetch_httplib2(url, 'POST', data, header)
         if status != '200' and status != '304' and status != '404':
             print('status %s, try %d ...' % (status, times + 1))
-            return post_url(url, method, header, data, cached, times + 1)
+            return post_url(url, header, data, cached, times + 1)
         return response, True
     except:
         print("try: ", url)
