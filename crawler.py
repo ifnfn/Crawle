@@ -32,6 +32,7 @@ def main_x8x8():
 
 def data_test():
     data1 = engine.data_load('data_all_only')
+    count = 0
 
     for data in data1:
         count += 1
@@ -46,5 +47,5 @@ def main_book():
 
 if __name__ == '__main__':
     # main_book()
-    main_x8x8()
-    # data_test()
+    #main_x8x8()
+    data_test()
