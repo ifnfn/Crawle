@@ -11,15 +11,23 @@ import zlib
 import re
 import pickle
 import gzip
-from Crypto.Cipher import AES
 
-import httplib2
-
+try:
+    from urlparse import urlparse
+    import urllib
+    import httplib as http
+    urlretrieve = urllib.urlretrieve
+    import urllib2 as urllib
+except:
+    from urllib.parse import urlparse
+    import urllib.request
+    import http.client as http
+    urlretrieve = urllib.request.urlretrieve
 
 global headers
 
 MAX_TRY = 3
-socket_timeout = 30
+socket_timeout = 300
 
 
 class AEScoder():
@@ -48,38 +56,29 @@ headers = {
     'Cache-Control': 'max-age=0'
 }
 
+def fetch_httplib2(url, method='GET', data=None, headers={}):
+    conn = urlparse(url)
 
-def fetch_httplib2(url, method='GET', data=None, header=headers, cookies=None, referer=None, acceptencoding=None):
-    if cookies and cookies != 'none':
-        header['Cookie'] = cookies
-    if referer:
-        header['referer'] = referer
-    if acceptencoding == None or acceptencoding == 'default':
-        header['Accept-Encoding'] = 'gzip, deflate'
+    if conn.scheme == "https":
+        connection = http.HTTPSConnection(conn.netloc, timeout=socket_timeout)
     else:
-        header['Accept-Encoding'] = acceptencoding
+        connection = http.HTTPConnection(conn.netloc, timeout=socket_timeout)
+    # connection.debuglevel = 1
 
-    if method == 'POST':
-        header['Content-Type'] = 'application/x-www-form-urlencoded'
-    conn = httplib2.Http(timeout=socket_timeout)
-    conn.follow_redirects = True
-    response, responses = conn.request(uri=url, method=str(
-        method).upper(), body=data,  headers=header)
+    connection.request(method=method, url=conn.path + '?' +
+                       conn.query, body=data, headers=headers)
+    response = connection.getresponse()
+
     try:
-        content_type = response['content-type']
+        content_type = response.headers['content-type']
     except:
         content_type = ''
     try:
-        location = response['location']
+        location = response.headers['location']
     except:
         location = ''
 
-    if 'referer' in headers:
-        headers.pop('referer')
-    if 'Cookie' in headers:
-        headers.pop('Cookie')
-
-    return response['status'], content_type, location, responses
+    return response.getcode(), content_type, location, response.read(),
 
 
 def get_cache(url):
@@ -124,7 +123,7 @@ def get_url(url, times=0):
         return '', False
     try:
         status, _, _, response = fetch_httplib2(url)
-        if status != '200' and status != '304' and status != '404':
+        if status != 200 and status != 304 and status != 404:
             print('status %s, try %d, %s ...' % (status, times + 1, url))
             return get_url(url, times + 1)
         return response, True

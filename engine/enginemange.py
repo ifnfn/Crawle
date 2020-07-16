@@ -131,9 +131,10 @@ class Crawler:
         data_save(filename, self.data)
 
     def Load(self, filename):
-        self.data = data_load(filename)
-        if self.data == None:
-            self.data = []
+        if os.path.isfile(filename):
+            self.data = data_load(filename)
+            if self.data == None:
+                self.data = []
 
     def Fly(self):
         self.tv.Start()
