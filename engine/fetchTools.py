@@ -11,6 +11,7 @@ import zlib
 import re
 import pickle
 import gzip
+import ssl 
 
 try:
     from urlparse import urlparse
@@ -60,7 +61,7 @@ def fetch_httplib2(url, method='GET', data=None, headers={}):
     conn = urlparse(url)
 
     if conn.scheme == "https":
-        connection = http.HTTPSConnection(conn.netloc, timeout=socket_timeout)
+        connection = http.HTTPSConnection(conn.netloc, timeout=socket_timeout,context=ssl._create_unverified_context())
     else:
         connection = http.HTTPConnection(conn.netloc, timeout=socket_timeout)
     # connection.debuglevel = 1

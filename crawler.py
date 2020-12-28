@@ -29,6 +29,29 @@ def main_x8x8():
 
     craw.Save('data_all_only')
 
+def main_caowo16():
+    craw = engine.Crawler(16)
+    craw.AddEngine(Caowo16Engine)
+    craw.Load('data_all_only_caowo16')
+    craw.Fly()
+
+    key = {}
+    count = 0
+
+    data_all = []
+    for data in craw.data:
+        ids = data['url']
+        if ids not in key:
+            count += 1
+            key[ids] = data
+            # print("%4d %10s %s %s" % (count, data['time'], data['url'], data['text']))
+            data_all.append(data)
+    craw.data = data_all
+
+    print('count: ', len(data_all))
+
+    craw.Save('data_all_only_caowo16')
+
 
 def data_test_merge():
     data1 = engine.data_load('data_all_only')
@@ -58,13 +81,16 @@ def data_test_merge():
     craw.data = data3
     craw.Save('data_all_only-2')
 
-def data_show():
-    data1 = engine.data_load('data_all_only')
+def data_show(filename):
+    data1 = engine.data_load(filename)
     count = 0
 
     for data in data1:
         count += 1
-        print("%4d %10s %s %s" % (count, data['time'], data['url'], data['text']))
+        if 'time' in data:
+            print("%4d %10s %s %s" % (count, data['time'], data['url'], data['text']))
+        else:
+            print("%4d %s %s" % (count, data['url'], data['text']))
 
 def main_book():
     craw = engine.Crawler(12)
@@ -73,6 +99,8 @@ def main_book():
 
 
 if __name__ == '__main__':
-    # main_book()
+    main_book()
     # main_x8x8()
-    data_show()
+    # data_show('data_all_only_x8x8')
+    # main_caowo16()
+    # data_show('data/data_all_only_caowo16')
