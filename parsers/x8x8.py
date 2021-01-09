@@ -2,16 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from engine import *
-from bs4 import BeautifulSoup as bs
 import os
 import re
-import sys
-sys.path.append("../")
 
-try:
-    import urllib2 as urllib
-except:
-    from urllib.parse import urljoin
+from urllib.parse import urljoin
 
 count = 0
 
@@ -28,7 +22,7 @@ class X8List(KolaParser):
         if 'private' in text:
             data = text['private']
 
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
         # print(text['data'])
 
         i = 0
@@ -80,7 +74,7 @@ class X8Detailed(KolaParser):
         if 'private' in text:
             data = text['private']
 
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
 
         for v in soup.findAll('span', {"id": "vpath"}):
             vservers = ["https://aikantp.com/v/", "https://jiuktp.com/v/"]
@@ -116,19 +110,6 @@ class X8Engine(EngineBase):
     def Start(self):
         url = 'https://8atw.com/html/category/video/'
         url = 'https://8xmcjp.com/html/category/video/'
-
-        # text, ret = get_url('https://8x8x.com')
-        # print(text)
-        # if ret:
-        #     soup = bs(text, "html.parser", exclude_encodings='UTF8')
-        #     for v in soup.findAll('span', {"class": "abc"}):
-        #         urls = v.findAll('a')
-        #         if urls:
-        #             url = urljoin(urls[0]['href'], 'html/category/video/')
-
-        #  url = 'https://8bwj.com/html/category/video/page_724.html'
-        # url = 'https://8aam.com/html/category/video/page_1.html'
-        # # url = 'https://8aam.com/html/category/video/page_1220.html'
         url = 'https://8xmcjp.com/html/other/index_11_1.html'
         X8List(url).AddCommand()
 

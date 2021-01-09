@@ -1,8 +1,6 @@
 #! /usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import os
-
 from engine import *
 from urllib.parse import urljoin
 
@@ -14,9 +12,7 @@ class pageList(KolaParser):
 
         soup = self.Html(text['data'])
 
-        # 从当前页提取每一条记录
-        for item in soup.findAll('div', {"class": "item"}):
-            print(item)
+        for tc_nr in soup.findAll('li', {"class": "col-list"}):
             data = {
                 'text': '',
                 'href': '',
@@ -25,18 +21,23 @@ class pageList(KolaParser):
                 'date': '',
                 'url': ''
             }
-            # TODO
 
-            if data['href']:
-                    pageDetailed(data['href'], data).AddCommand()
+            hrefs = tc_nr.findAll('a')
+            img = hrefs[0].findAll('img', {'class': 'lazyload'})
+            data['img'] = img[0]['data-src']
+            data['href'] = hrefs[1]['href']
+            data['text'] = hrefs[1].text
 
-        # 提出下一页
+            pageDetailed(data['href'], data).AddCommand()
+
+        # 下一页
         next_url = ''
-        for page in soup.findAll('a', {'class': 'page-link'}):
-            next_url = urljoin(text['source'], page['href'])
-            print(next_url)
-            pageList(next_url).AddCommand()
-
+        for page in soup.findAll('div', {'class': 'my_titlexpage'}):
+            for href in page.findAll('a', {}):
+                if href.text == '下一页':
+                    next_url = urljoin(text['source'], href['href'])
+                    print(next_url)
+                    pageList(next_url).AddCommand()
         if not next_url:
             self.Finish()
 
@@ -55,17 +56,30 @@ class pageDetailed(KolaParser):
             data = text['private']
 
         soup = self.Html(text['data'])
+        # print(soup)
 
-        # <div class="" id="cms_player"
-        for v in soup.findAll('iframe', {}):
-            data['url'] = v['src'][14:]
-            print(os.path.basename(data['img']))
-            # print(os.path.basename(data['img']), data['text'])
+        ziliao = soup.findAll('ul', {'class': 'about_ul'})
+        for li in ziliao[0].findAll('li', {}):
+            key = li.text.split('：')
+            if key[0] == '更新':
+                data['date'] = key[1]
+            else:
+                data[key[0]] = key[1]
+
+        for v in soup.findAll('ul', {'class': 'playerlist'}):
+            for data_purl in v.findAll('li', {}):
+                url = data_purl['data_purl'].split('?url=')[1]
+                if url:
+                    data['url'] = url
+                    break
             break
+
+        print(data['date'], data['text'], data['url'])
+        # print(data)
 
         return data
 
-class DummyEngine(EngineBase):
+class OnehoneEngine(EngineBase):
     def __init__(self):
         self.parserList = [
             pageDetailed(),
@@ -73,13 +87,13 @@ class DummyEngine(EngineBase):
         ]
 
     def Start(self):
-        url = 'https://......................'
+        url = 'https://www.1hone.com/list_0_1_0_0_0_1.html'
         pageList(url).AddCommand()
 
 
-def DummyParser(filename):
+def OnehoneParser(filename):
     craw = Crawler(16)
-    craw.AddEngine(DummyEngine)
+    craw.AddEngine(OnehoneEngine)
     craw.Load(filename)
     craw.Fly()
 

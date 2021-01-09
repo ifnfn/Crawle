@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from engine import *
-from bs4 import BeautifulSoup as bs
 import re
-import sys
-sys.path.append("../")
-
 
 class ParserBookDetailed(KolaParser):
     """
@@ -27,7 +23,7 @@ class ParserBookDetailed(KolaParser):
         解析
         """
         data = text['private']
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
 
         bookdata = soup.findAll(
             'div', {"class": "m-bookdata j-bookdata f-cb"})
@@ -92,7 +88,7 @@ class ParserBookList(KolaParser):
 
         soup = bs(text['data'], "html.parser")  # , from_encoding = 'GBK')
         data = []
-        booksList = soup.findAll('a', {"class": "title"})
+        soup = self.Html(text['data'])
         for p in booksList:
             book = {}
             book['href'] = p['href']

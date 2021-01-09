@@ -21,5 +21,6 @@ def data_show(filename):
 if __name__ == '__main__':
     # SokindleParser()
     #X8Parser('data/data_all_only_x8x8')
-    Caowo16Parser('data/data_all_only_caowo16')
+    # Caowo16Parser('data/data_all_only_caowo16')
+    OnehoneParser('data/1hone')
     # data_show('data/data_all_only_caowo16')

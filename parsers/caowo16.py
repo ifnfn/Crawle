@@ -1,30 +1,18 @@
 #! /usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from engine import *
-from bs4 import BeautifulSoup as bs
 import os
-import re
 
+from engine import *
 from urllib.parse import urljoin
 
-count = 0
-
-
 class pageList(KolaParser):
-    def __init__(self, url=None):
-        super().__init__()
-        if url:
-            self.cmd['source'] = url
-            # self.cmd['cache'] = False
-
     def cmd_parser(self, text):
         data = {}
         if 'private' in text:
             data = text['private']
 
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
-        # print(text['data'])
+        soup = self.Html(text['data'])
 
         for tc_nr in soup.findAll('div', {"class": "item"}):
             href = tc_nr.findAll('a')
@@ -51,7 +39,6 @@ class pageList(KolaParser):
         if not next_url:
             self.Finish()
 
-
 class pageDetailed(KolaParser):
     def __init__(self, url=None, data=None):
         super().__init__()
@@ -61,13 +48,11 @@ class pageDetailed(KolaParser):
             self.cmd['private'] = data
 
     def cmd_parser(self, text):
-        global count
-
         data = {}
         if 'private' in text:
             data = text['private']
 
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
 
         # <div class="" id="cms_player"
         for v in soup.findAll('iframe', {}):

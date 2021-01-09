@@ -5,6 +5,7 @@ import sys
 import traceback
 import queue
 from urllib.parse import urljoin
+from bs4 import BeautifulSoup as bs
 
 MAX_TRY = 3
 
@@ -42,11 +43,14 @@ class KolaParser:
     网页解析器
     """
 
-    def __init__(self):
+    def __init__(self, url=None):
         self.cmd = {}
         self.name = self.__class__.__module__ + '.' + self.__class__.__name__
         self.cmd['engine'] = self.name
         self.cmd['cache'] = True
+        if url:
+            self.cmd['source'] = url
+
 
     def Finish(self):
         global commands
@@ -66,6 +70,9 @@ class KolaParser:
     def cmd_parser(self, text):
         return None
 
+
+    def Html(self, text):
+        return bs(text, "html.parser", exclude_encodings='UTF8')
 
 
 class EngineBase:

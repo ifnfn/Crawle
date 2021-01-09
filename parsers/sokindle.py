@@ -2,14 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from engine import *
-import sys
 import re
 from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup as bs
-
-sys.path.append("../")
-
 
 class ParserDoubanISBN(KolaParser):
     def __init__(self, url=None, data=None):
@@ -24,7 +18,7 @@ class ParserDoubanISBN(KolaParser):
         if 'private' in text:
             data = text['private']
 
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
 
         for info in soup.findAll("div", {"class": "info"}):
             href = info.findAll("a", {"onclick": re.compile('.*')})
@@ -79,7 +73,7 @@ class ParserBookDetailed(KolaParser):
         data = {}
         if 'private' in text:
             data = text['private']
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
 
         secret_data = soup.findAll('div', {"class": "e-secret"})
 

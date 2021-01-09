@@ -30,7 +30,7 @@ class ParserBookDetailed(KolaParser):
         解析
         """
         data = text['private']
-        soup = bs(text['data'], "html.parser", exclude_encodings='UTF8')
+        soup = self.Html(text['data'])
 
         bookdata = soup.findAll(
             'div', {"class": "m-bookdata j-bookdata f-cb"})
