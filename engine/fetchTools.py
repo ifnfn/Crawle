@@ -7,11 +7,10 @@ import os
 import shutil
 import sys
 import traceback
-import zlib
 import re
 import pickle
 import gzip
-import ssl 
+import ssl
 
 try:
     from urlparse import urlparse
@@ -200,6 +199,22 @@ def RegularMatchUrl(url, regular):
     return RegularMatch([regular], response)
 
 
+def data_save(filename, *objects):
+    with gzip.open(filename, 'wb') as fil:
+        for obj in objects:
+            pickle.dump(obj, fil)
+
+
+def data_load(filename):
+    with gzip.open(filename, 'rb') as fil:
+        while True:
+            try:
+                return pickle.load(fil)
+            except EOFError:
+                break
+
+
+
 if __name__ == '__main__':
     # url = 'http://store.tv.sohu.com/view_content/movie/5008825_704321.html'
     # url = 'http://index.tv.sohu.com/index/switch-aid/1012657'
@@ -226,18 +241,3 @@ if __name__ == '__main__':
     # except:
     #     content_type = ''
     print(response.decode())
-
-
-def data_save(filename, *objects):
-    with gzip.open(filename, 'wb') as fil:
-        for obj in objects:
-            pickle.dump(obj, fil)
-
-
-def data_load(filename):
-    with gzip.open(filename, 'rb') as fil:
-        while True:
-            try:
-                return pickle.load(fil)
-            except EOFError:
-                break

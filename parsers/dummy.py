@@ -6,6 +6,8 @@ import os
 from engine import *
 from urllib.parse import urljoin
 
+
+# 解析资源列表
 class pageList(KolaParser):
     def cmd_parser(self, text):
         data = {}
@@ -41,6 +43,7 @@ class pageList(KolaParser):
             self.Finish()
 
 
+# 解析资源详细数据
 class pageDetailed(KolaParser):
     def __init__(self, url=None, data=None):
         super().__init__()
