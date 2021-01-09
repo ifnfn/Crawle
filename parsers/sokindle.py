@@ -214,3 +214,9 @@ class SokindleEngine(EngineBase):
         # data['isbn'] = '9787221124913'
         # ParserDoubanISBN('9787221124913', data).AddCommand()
         pass
+
+
+def SokindleParser():
+    craw = Crawler(12)
+    craw.AddEngine(SokindleEngine)
+    craw.Fly()

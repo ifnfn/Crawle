@@ -96,8 +96,7 @@ class KolaEngine:
 
             # 数据正则匹配
             if 'regular' in cmd:
-                response = self.RegularMatch(
-                    cmd['regular'], response).encode(coding)
+                response = RegularMatch(cmd['regular'], response).encode(coding)
             if response:
                 if type(response) == bytes:
                     response = response.decode(coding)

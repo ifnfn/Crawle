@@ -4,6 +4,7 @@
 import sys
 import traceback
 import queue
+from urllib.parse import urljoin
 
 MAX_TRY = 3
 
@@ -64,6 +65,7 @@ class KolaParser:
 
     def cmd_parser(self, text):
         return None
+
 
 
 class EngineBase:

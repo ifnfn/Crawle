@@ -115,6 +115,7 @@ class X8Engine(EngineBase):
 
     def Start(self):
         url = 'https://8atw.com/html/category/video/'
+        url = 'https://8xmcjp.com/html/category/video/'
 
         # text, ret = get_url('https://8x8x.com')
         # print(text)
@@ -125,7 +126,32 @@ class X8Engine(EngineBase):
         #         if urls:
         #             url = urljoin(urls[0]['href'], 'html/category/video/')
 
-        url = 'https://8bwj.com/html/category/video/page_724.html'
+        #  url = 'https://8bwj.com/html/category/video/page_724.html'
         # url = 'https://8aam.com/html/category/video/page_1.html'
         # # url = 'https://8aam.com/html/category/video/page_1220.html'
+        url = 'https://8xmcjp.com/html/other/index_11_1.html'
         X8List(url).AddCommand()
+
+
+def X8Parser(filename):
+    craw = Crawler(16)
+    craw.AddEngine(X8Engine)
+    craw.Load(filename)
+    craw.Fly()
+
+    key = {}
+    count = 0
+
+    data_all = []
+    for data in craw.data:
+        ids = os.path.basename(data['url'][:-4])
+        if ids not in key:
+            count += 1
+            key[ids] = data
+            # print("%4d %10s %s %s" % (count, data['time'], data['url'], data['text']))
+            data_all.append(data)
+    craw.data = data_all
+
+    print('count: ', len(data_all))
+
+    craw.Save(filename)

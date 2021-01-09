@@ -115,7 +115,7 @@ class ParserBookList(KolaParser):
 # JD 搜索引擎
 
 
-class JDEngine(EngineBase):
+class KindlePushEngine(EngineBase):
     def __init__(self):
         self.parserList = [
             ParserBookDetailed(),
