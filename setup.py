@@ -17,7 +17,7 @@ settings = dict()
 
 settings.update(
     name=APP_NAME,
-    version="v1.0.0",
+    version="1.0.1",
     description='HTML parser tools, crawle data framework.',
     author='Zhuzhg',
     author_email='zzg@ifnfn.com',

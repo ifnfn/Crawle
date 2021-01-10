@@ -13,5 +13,7 @@ if __name__ == '__main__':
             OnehoneParser("data_1hone")
         elif sys.argv[1] == 'caowo16':
             Caowo16Parser("data_caowo16")
+        elif sys.argv[1] == 'x8x8':
+            X8x8Parser('data_x8x8')
     else:
         OnehoneParser("data_1hone")

@@ -9,17 +9,15 @@ from urllib.parse import urljoin
 class caowo16_pageList(HtmlParser):
     def cmd_parser(self, soup):
         for tc_nr in soup.findAll('div', {"class": "item"}):
-            href = tc_nr.findAll('a')
-            if href and href[0]['href'] != '/':
-                self.data['href'] = urljoin(self.url, href[0]['href'])
-                self.data['text'] = href[0]['title']
+            href = tc_nr.find('a')
+            if href and href['href'] != '/':
+                self.data['href'] = urljoin(self.url, href['href'])
+                self.data['text'] = href['title']
                 self.data['time'] = ''
                 self.data['date'] = ''
 
-                img = href[0].findAll('img', {"class": "thumb lazy-load"})
-                if img:
-                    self.data['img'] = img[0]['src']
-                    self.engine.Add(caowo16_pageDetailed(self.data['href'], self.data))
+                self.data['img'] = href.find('img', {"class": "thumb lazy-load"})['src']
+                self.engine.Add(caowo16_pageDetailed(self.data['href'], self.data))
 
         # 下一页
         # <li class="page-item disabled">
@@ -35,12 +33,14 @@ class caowo16_pageList(HtmlParser):
 
 class caowo16_pageDetailed(HtmlParser):
     def cmd_parser(self, soup):
-        # <div class="" id="cms_player"
-        for v in soup.findAll('iframe', {}):
-            self.data['url'] = v['src'][14:]
-            break
+        iframe = soup.find('iframe', {})
 
-        return True
+        url = iframe['src'].split('?url=')
+
+        if len(url) == 2:
+            self.data['url'] = url[1]
+
+            return True
 
 def Caowo16Parser(filename, max_count=0):
     craw = Crawler(thread_num=1, max_count=max_count)
