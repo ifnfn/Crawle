@@ -212,32 +212,3 @@ def data_load(filename):
                 return pickle.load(fil)
             except EOFError:
                 break
-
-
-
-if __name__ == '__main__':
-    # url = 'http://store.tv.sohu.com/view_content/movie/5008825_704321.html'
-    # url = 'http://index.tv.sohu.com/index/switch-aid/1012657'
-    # url = 'http://www.kolatv.com/'
-    # _, _, _, response = fetch_httplib2(url)
-    # print(response.decode())
-
-    # url = "http://127.0.0.1:8080/get"
-    url = "https://sokindle.com/books/4660.html"
-    data = "e_secret_key=523523"
-
-    header = {}
-    header["User-Agent"] = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36"
-    header["Content-Type"] = "application/x-www-form-urlencoded"
-
-    response, found = fetch(url, "GET", cached=False)
-    print(response.decode())
-
-    response, found = fetch(url, "POST", header, data, False)
-    # response, responses = conn.request(
-    #     uri=url, method="POST", body=data, headers=header)
-    # try:
-    #     content_type = response['content-type']
-    # except:
-    #     content_type = ''
-    print(response.decode())
