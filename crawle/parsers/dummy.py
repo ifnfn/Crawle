@@ -4,25 +4,16 @@
 from crawle.engine import *
 from urllib.parse import urljoin
 
-class ListPage(HtmlParser):
+class dummy_ListPage(HtmlParser):
     def cmd_parser(self, soup):
         for tc_nr in soup.findAll('li', {"class": "col-list"}):
-            self.data = {
-                'text': '',
-                'href': '',
-                'img' : '',
-                'time': '',
-                'date': '',
-                'url': ''
-            }
-
             hrefs = tc_nr.findAll('a')
             img = hrefs[0].findAll('img', {'class': 'lazyload'})
             self.data['img'] = img[0]['data-src']
             self.data['href'] = hrefs[1]['href']
             self.data['text'] = hrefs[1].text
             # print(self.data)
-            self.engine.Add(DetailedPage(self.data['href'], self.data))
+            self.engine.Add(dummy_DetailedPage(self.data['href'], self.data))
 
         # 下一页
         next_url = ''
@@ -31,14 +22,15 @@ class ListPage(HtmlParser):
                 if href.text == '下一页':
                     next_url = urljoin(self.url, href['href'])
                     # print(next_url)
-                    self.engine.Add(ListPage(next_url))
+                    self.engine.Add(dummy_ListPage(next_url))
         if not next_url:
             self.engine.Finish()
 
+        # 返回 True, 表示解析到完整的数据， False，返回未完成的数据，或者无效数据
         return False
 
 
-class DetailedPage(HtmlParser):
+class dummy_DetailedPage(HtmlParser):
     def cmd_parser(self, soup):
         # print(soup)
 
@@ -52,19 +44,20 @@ class DetailedPage(HtmlParser):
 
         for v in soup.findAll('ul', {'class': 'playerlist'}):
             for data_purl in v.findAll('li', {}):
-                url = data_purl['data_purl'].split('?url=')[1]
-                if url:
-                    self.data['url'] = url
+                url = data_purl['data_purl'].split('?url=')
+                if len(url) > 0:
+                    self.data['url'] = url[0]
                     break
             break
 
+        # 返回 True, 表示解析到完整的数据， False，返回未完成的数据，或者无效数据
         return True
 
-def OnehoneParser(filename):
-    craw = Crawler(thread_num=1, max_count=200)
-    craw.log = lambda data : print(data['date'], data['text'], data['url'])
+def DummyParser(filename):
+    craw = Crawler(thread_num=1, max_count=400)
+    craw.log = lambda data : print(data['id'], data['date'], data['text'], data['url'])
 
-    url = 'https://www.1hone.com/list_0_1_0_0_0_1.html'
-    craw.Add(pageList(url))
+    url = 'https://..............'
+    craw.Add(dummy_ListPage(url))
     craw.Fly()
     craw.Save(filename)

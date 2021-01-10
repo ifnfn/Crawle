@@ -5,6 +5,8 @@ import sys
 import traceback
 import queue
 import threading
+import hashlib
+import json
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup as bs
 from .fetchTools import *
@@ -23,7 +25,7 @@ class HtmlParser:
         self.body = {}
         self.header = {}
         self.cached = True
-        self.data = data
+        self.data = data.copy()
 
         self.engine = None
         self.cmd = {}
@@ -77,23 +79,27 @@ class Crawler:
         self.page_queue = queue.Queue()
         self.quit = False
         self.count = max_count
-        self.log = None
+        self.log = lambda data : print(data['id'], data['text'], data['url'])
 
         self.threads = []
         for _ in range(thread_num):
             self.threads.append(Work(self))
 
-        self.data = []
+        self.data = {}
         self.index = 0
 
 
     def AppendData(self, data):
         if self.count == 0 or self.index < self.count:
-            data['id'] = self.index
-            self.data.append(data)
-            self.index += 1
-            if self.log:
-                self.log(data)
+            hash_str = hashlib.md5(json.dumps(data).encode()).hexdigest()
+            if hash_str not in self.data:
+                data['id'] = self.index
+                data['hash'] = hash_str
+                self.data[hash_str] = data
+
+                self.index += 1
+                if self.log:
+                    self.log(data)
         else:
             self.quit = True
 
@@ -116,19 +122,12 @@ class Crawler:
 
     def Save(self, filename):
         with gzip.open(filename, 'wb') as fil:
-            for obj in self.data:
-                pickle.dump(obj, fil)
+            pickle.dump(self.data, fil)
 
     def Load(self, filename):
         if os.path.exists(filename):
-            try:
-                with gzip.open(filename, 'rb') as fil:
-                    self.data = pickle.load(fil)
-                    if self.data == None:
-                        self.data = []
-            except EOFError:
-                self.data = []
-
+            with gzip.open(filename, 'rb') as fil:
+                self.data = pickle.load(fil)
 
     def Finish(self):
         self.quit = True
