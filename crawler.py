@@ -5,13 +5,13 @@ import sys
 from crawle.parsers import *
 
 def onehone_main():
-    OnehoneParser("data")
+    OnehoneParser("data_1hone")
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == '1hone':
-            OnehoneParser("data", 100)
+            OnehoneParser("data_1hone")
         elif sys.argv[1] == 'caowo16':
-            Caowo16Parser("data")
+            Caowo16Parser("data_caowo16")
     else:
-        OnehoneParser("data", 10)
+        OnehoneParser("data_1hone")
